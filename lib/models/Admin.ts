@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAdmin extends Document {
-  firebaseUid: string;
+  firebaseUid?: string;
   name: string;
   email: string;
   role: mongoose.Types.ObjectId;
@@ -13,7 +13,7 @@ export interface IAdmin extends Document {
 
 const AdminSchema: Schema = new Schema(
   {
-    firebaseUid: { type: String, required: true, unique: true, index: true },
+    firebaseUid: { type: String, sparse: true, unique: true, index: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     role: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
