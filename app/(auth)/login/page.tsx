@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function AdminLoginPage() {
-  const { login, admin } = useAuth();
+  const { login, admin, mongoAdmin } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState('');
@@ -15,22 +15,30 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (admin) {
+    if (admin && mongoAdmin) {
       router.push('/admin/dashboard');
     }
-  }, [admin, router]);
+  }, [admin, mongoAdmin, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(trimmedEmail, password);
       router.push('/admin/dashboard');
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Invalid credentials or access denied.');
+      console.error('Login Error Caught:', err);
+      const msg = err?.message || 'Invalid credentials or access denied.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -60,7 +68,6 @@ export default function AdminLoginPage() {
               name="email"
               type="email"
               autoComplete="email"
-              required
               className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black sm:text-sm"
               placeholder="admin@sash.com"
               value={email}
@@ -73,19 +80,12 @@ export default function AdminLoginPage() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <Link
-                href="/forgot-password"
-                className="text-xs font-semibold text-gray-600 hover:text-black"
-              >
-                Forgot Password?
-              </Link>
             </div>
             <input
               id="password"
               name="password"
               type="password"
               autoComplete="current-password"
-              required
               className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black sm:text-sm"
               placeholder="••••••••"
               value={password}

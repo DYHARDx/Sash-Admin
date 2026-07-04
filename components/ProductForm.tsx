@@ -44,7 +44,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
 
   // Images
   const [images, setImages] = useState<string[]>(initialData?.images || []);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imgUrlInput, setImgUrlInput] = useState('');
 
   // Variants list
   const [variants, setVariants] = useState<Variant[]>(initialData?.variants || []);
@@ -70,29 +70,10 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setError('');
-    setUploadingImage(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      setImages((prev) => [...prev, data.url]);
-    } catch (err: any) {
-      setError(err.message || 'Image upload failed.');
-    } finally {
-      setUploadingImage(false);
-    }
+  const handleAddImageUrl = () => {
+    if (!imgUrlInput.trim()) return;
+    setImages((prev) => [...prev, imgUrlInput.trim()]);
+    setImgUrlInput('');
   };
 
   const removeImage = (index: number) => {
@@ -443,31 +424,26 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
             </div>
           </div>
 
-          {/* Cloudinary Gallery Manager */}
+          {/* Image URL Manager */}
           <div className="p-4 border border-gray-200 rounded space-y-4">
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-gray-900 border-b border-gray-100 pb-2">Cloudinary Gallery</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-gray-900 border-b border-gray-100 pb-2">Image Gallery URLs</h3>
             
-            {/* Input uploader */}
-            <div className="flex justify-center items-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  {uploadingImage ? (
-                    <Loader2 className="animate-spin text-gray-500" size={20} />
-                  ) : (
-                    <>
-                      <Upload className="text-gray-400 mb-1" size={20} />
-                      <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wide">Upload Photo</p>
-                    </>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  disabled={uploadingImage}
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-              </label>
+            {/* URL Input */}
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Paste image URL here..."
+                className="flex-1 rounded border border-gray-300 bg-white px-3 py-1.5 focus:border-black focus:outline-none"
+                value={imgUrlInput}
+                onChange={(e) => setImgUrlInput(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleAddImageUrl}
+                className="bg-black text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2 rounded hover:bg-gray-800"
+              >
+                Add Link
+              </button>
             </div>
 
             {/* List previews */}

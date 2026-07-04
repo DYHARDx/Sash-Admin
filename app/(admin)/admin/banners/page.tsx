@@ -30,7 +30,6 @@ export default function BannersPage() {
   const [position, setPosition] = useState(0);
 
   const [formLoading, setFormLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     fetchBanners();
@@ -53,30 +52,7 @@ export default function BannersPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    setError('');
-    setUploadingImage(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      setImageUrl(data.url);
-    } catch (err: any) {
-      setError(err.message || 'Image upload failed.');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
 
   const handleEditClick = (b: Banner) => {
     setEditId(b._id);
@@ -267,29 +243,20 @@ export default function BannersPage() {
           </div>
 
           {/* Banner Graphic Uploader */}
+          {/* Banner Graphic URL Input */}
           <div>
-            <label className="block text-[10px] font-bold uppercase mb-1">Banner Graphic</label>
+            <label className="block text-[10px] font-bold uppercase mb-1">Banner Graphic URL</label>
             <div className="flex gap-4 items-center mt-1">
-              <label className="flex flex-col items-center justify-center w-28 h-20 border border-dashed border-gray-300 rounded hover:bg-gray-100 cursor-pointer bg-white">
-                {uploadingImage ? (
-                  <Loader2 className="animate-spin text-gray-500" size={16} />
-                ) : (
-                  <>
-                    <Upload className="text-gray-400 mb-0.5" size={16} />
-                    <span className="text-[8px] text-gray-500 font-bold uppercase">Upload</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  disabled={uploadingImage}
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-              </label>
+              <input
+                type="text"
+                placeholder="Paste image URL here..."
+                className="flex-1 rounded border border-gray-300 bg-white px-3 py-1.5 focus:border-black focus:outline-none"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
 
               {imageUrl && (
-                <div className="relative border border-gray-200 rounded overflow-hidden w-40 h-20 bg-gray-50">
+                <div className="relative border border-gray-200 rounded overflow-hidden w-40 h-20 bg-gray-50 flex-shrink-0">
                   <img src={imageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
                 </div>
               )}

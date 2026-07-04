@@ -23,9 +23,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [admin, setAdmin] = useState<FirebaseUser | null>(null);
   const [mongoAdmin, setMongoAdmin] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const isLoggingIn = React.useRef(false);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
+    isLoggingIn.current = true;
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const token = await credential.user.getIdToken();
@@ -51,9 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setMongoAdmin(data.admin);
     } catch (error) {
       console.error('Admin Login failed:', error);
+      await signOut(auth).catch(() => {});
       throw error;
     } finally {
       setLoading(false);
+      isLoggingIn.current = false;
     }
   };
 
@@ -76,6 +80,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setAdmin(firebaseUser);
+        
+        if (isLoggingIn.current) {
+           setLoading(false);
+           return;
+        }
+
         try {
           const res = await fetch('/api/auth/me');
           if (res.ok) {

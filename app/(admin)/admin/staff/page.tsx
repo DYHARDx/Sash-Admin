@@ -31,6 +31,7 @@ export default function StaffPage() {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [roleId, setRoleId] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
@@ -77,7 +78,7 @@ export default function StaffPage() {
     setError('');
     setFeedback('');
 
-    if (!name.trim() || !email.trim() || !roleId) {
+    if (!name.trim() || !email.trim() || !password || !roleId) {
       setError('All fields are required.');
       setFormLoading(false);
       return;
@@ -90,6 +91,7 @@ export default function StaffPage() {
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim().toLowerCase(),
+          password: password,
           role: roleId,
         }),
       });
@@ -99,6 +101,7 @@ export default function StaffPage() {
         setFeedback(`Admin profile for '${data.admin.name}' created successfully.`);
         setName('');
         setEmail('');
+        setPassword('');
         setShowForm(false);
         // Refresh local staff list
         setStaff([data.admin, ...staff]);
@@ -240,7 +243,18 @@ export default function StaffPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <p className="text-[10px] text-gray-400">On first login with this email, their Firebase account link will register.</p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Temporary Password</label>
+            <input
+              type="text"
+              placeholder="e.g. Secret@123"
+              className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-xs focus:border-black focus:outline-none font-mono"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <p className="text-[10px] text-gray-400">Share this password with the new staff member.</p>
           </div>
 
           <div className="space-y-2">

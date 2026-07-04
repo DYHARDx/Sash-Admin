@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied: Super Admin only' }, { status: 403 });
     }
 
-    const { name, email, role } = await request.json();
+    const { name, email, password, role } = await request.json();
 
-    if (!name || !email || !role) {
-      return NextResponse.json({ error: 'Name, Email, and Role are required' }, { status: 400 });
+    if (!name || !email || !password || !role) {
+      return NextResponse.json({ error: 'Name, Email, Password, and Role are required' }, { status: 400 });
     }
 
     const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
@@ -64,9 +64,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'An admin with this email already exists' }, { status: 400 });
     }
 
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Firebase API key is missing.' }, { status: 500 });
+    }
+
+    const firebaseRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.toLowerCase(),
+        password,
+        returnSecureToken: false,
+      }),
+    });
+
+    const firebaseData = await firebaseRes.json();
+
+    if (!firebaseRes.ok) {
+      console.error('Firebase Auth creation failed:', firebaseData);
+      return NextResponse.json(
+        { error: firebaseData.error?.message || 'Failed to create user in Firebase Auth.' },
+        { status: 400 }
+      );
+    }
+
+    const firebaseUid = firebaseData.localId;
+
     const newAdmin = await Admin.create({
       name,
       email: email.toLowerCase(),
+      firebaseUid,
       role,
       status: 'active',
       permissions: [],

@@ -23,9 +23,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
     }
 
+    // Generate slug from name
+    let baseSlug = name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const uniqueSuffix = Date.now().toString().slice(-6);
+    const slug = `${baseSlug}-${uniqueSuffix}`;
+
     await connectDB();
     const newProduct = await Product.create({
       name,
+      slug,
       description,
       price,
       compareAtPrice,

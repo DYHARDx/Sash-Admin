@@ -20,16 +20,19 @@ export async function middleware(request: NextRequest) {
 
   // All other pages in the admin app are protected
   if (!adminSessionToken) {
+    console.log('[Middleware] No admin_session_token cookie found. Redirecting to /login.');
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   const payload = await verifyFirebaseToken(adminSessionToken);
   if (!payload) {
+    console.log('[Middleware] verifyFirebaseToken failed (returned null). Redirecting to /login.');
     const response = NextResponse.redirect(new URL('/login', request.url));
     response.cookies.delete('admin_session_token');
     return response;
   }
 
+  console.log('[Middleware] Token valid, allowing access to:', pathname);
   return NextResponse.next();
 }
 

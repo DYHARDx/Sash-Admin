@@ -4,6 +4,8 @@ export async function POST(request: NextRequest) {
   try {
     const { idToken } = await request.json();
 
+    console.log('[Session API] Received idToken length:', idToken?.length);
+
     if (!idToken) {
       return NextResponse.json({ error: 'ID Token is required' }, { status: 400 });
     }

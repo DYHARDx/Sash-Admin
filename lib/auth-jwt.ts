@@ -26,7 +26,7 @@ export interface FirebaseTokenPayload {
 }
 
 export async function verifyFirebaseToken(token: string): Promise<FirebaseTokenPayload | null> {
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'testing-1a3f6';
   if (!projectId) {
     console.error("NEXT_PUBLIC_FIREBASE_PROJECT_ID is not defined in environment variables.");
     return null;
