@@ -61,6 +61,7 @@ export default function AdminLayout({
         <div className="flex flex-col flex-grow border-r border-gray-200 pt-5 bg-white overflow-y-auto">
           {/* Logo Section */}
           <div className="flex items-center flex-shrink-0 px-6">
+            <img src="/logo.png" alt="Sash Logo" className="h-8 w-auto mr-2 rounded" />
             <span className="text-xl font-black tracking-wider text-black">SASH PARTNER</span>
           </div>
           
@@ -113,7 +114,10 @@ export default function AdminLayout({
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile Top Header */}
         <header className="md:hidden flex items-center justify-between h-14 bg-white border-b border-gray-200 px-4 shrink-0">
-          <span className="text-base font-black tracking-wide">SASH PARTNER</span>
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Sash Logo" className="h-6 w-auto mr-2 rounded" />
+            <span className="text-base font-black tracking-wide">SASH PARTNER</span>
+          </div>
           <button onClick={logout} className="text-xs font-bold text-red-600 cursor-pointer">
             Sign Out
           </button>

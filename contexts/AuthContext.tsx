@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   User as FirebaseUser,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
@@ -29,7 +30,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     isLoggingIn.current = true;
     try {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
+      let credential;
+      try {
+        credential = await signInWithEmailAndPassword(auth, email, password);
+      } catch (signInError: any) {
+        if (signInError.code === 'auth/invalid-credential' || signInError.code === 'auth/user-not-found') {
+          try {
+            credential = await createUserWithEmailAndPassword(auth, email, password);
+          } catch (createError: any) {
+            if (createError.code === 'auth/email-already-in-use') {
+              throw new Error('Invalid email or password.');
+            }
+            throw createError;
+          }
+        } else {
+          throw signInError;
+        }
+      }
       const token = await credential.user.getIdToken();
 
       // Create session cookie
