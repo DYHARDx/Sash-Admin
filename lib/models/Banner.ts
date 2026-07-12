@@ -5,6 +5,8 @@ export interface IBanner extends Document {
   subtitle?: string;
   imageUrl: string;
   linkUrl: string;
+  bgText?: string;
+  bgColor?: string;
   status: 'active' | 'inactive';
   position: number;
   createdAt: Date;
@@ -17,6 +19,8 @@ const BannerSchema: Schema = new Schema(
     subtitle: { type: String },
     imageUrl: { type: String, required: true },
     linkUrl: { type: String, required: true },
+    bgText: { type: String },
+    bgColor: { type: String },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
     position: { type: Number, default: 0 },
   },

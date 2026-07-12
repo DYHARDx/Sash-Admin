@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, subtitle, imageUrl, linkUrl, status, position } = await request.json();
+    const { title, subtitle, imageUrl, linkUrl, bgText, bgColor, status, position } = await request.json();
 
     if (!imageUrl || !linkUrl || !title) {
       return NextResponse.json({ error: 'Title, Image URL, and Link URL are required' }, { status: 400 });
@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
       subtitle,
       imageUrl,
       linkUrl,
+      bgText,
+      bgColor,
       status: status || 'active',
       position: position !== undefined ? Number(position) : 0,
     });

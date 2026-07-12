@@ -9,6 +9,8 @@ interface Banner {
   subtitle?: string;
   imageUrl: string;
   linkUrl: string;
+  bgText?: string;
+  bgColor?: string;
   status: 'active' | 'inactive';
   position: number;
 }
@@ -26,6 +28,8 @@ export default function BannersPage() {
   const [subtitle, setSubtitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
+  const [bgText, setBgText] = useState('');
+  const [bgColor, setBgColor] = useState('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [position, setPosition] = useState(0);
 
@@ -60,6 +64,8 @@ export default function BannersPage() {
     setSubtitle(b.subtitle || '');
     setImageUrl(b.imageUrl);
     setLinkUrl(b.linkUrl);
+    setBgText(b.bgText || '');
+    setBgColor(b.bgColor || '');
     setStatus(b.status);
     setPosition(b.position);
     setShowForm(true);
@@ -98,6 +104,8 @@ export default function BannersPage() {
       subtitle,
       imageUrl,
       linkUrl,
+      bgText,
+      bgColor,
       status,
       position: Number(position)
     };
@@ -122,6 +130,8 @@ export default function BannersPage() {
       setSubtitle('');
       setImageUrl('');
       setLinkUrl('');
+      setBgText('');
+      setBgColor('');
       setStatus('active');
       setPosition(0);
       fetchBanners();
@@ -151,6 +161,8 @@ export default function BannersPage() {
               setSubtitle('');
               setImageUrl('');
               setLinkUrl('');
+              setBgText('');
+              setBgColor('');
               setStatus('active');
               setPosition(0);
               setShowForm(true);
@@ -239,6 +251,29 @@ export default function BannersPage() {
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase mb-1">Background Text (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. MENSWEAR"
+                className="w-full rounded border border-gray-300 bg-white px-3 py-1.5 focus:border-black focus:outline-none uppercase"
+                value={bgText}
+                onChange={(e) => setBgText(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase mb-1">Background Color (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. #F6E6D7 or bg-black"
+                className="w-full rounded border border-gray-300 bg-white px-3 py-1.5 focus:border-black focus:outline-none"
+                value={bgColor}
+                onChange={(e) => setBgColor(e.target.value)}
+              />
             </div>
           </div>
 

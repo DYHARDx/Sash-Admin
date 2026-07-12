@@ -8,6 +8,7 @@ interface Customer {
   name: string;
   email: string;
   phone?: string;
+  orderCount?: number;
   createdAt: string;
 }
 
@@ -90,6 +91,7 @@ export default function CustomersPage() {
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Email Address</th>
                 <th className="px-6 py-3">Phone Number</th>
+                <th className="px-6 py-3">Total Orders</th>
                 <th className="px-6 py-3">Date Joined</th>
               </tr>
             </thead>
@@ -112,6 +114,13 @@ export default function CustomersPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 font-mono">{cust.phone || '-'}</td>
+                    <td className="px-6 py-4">
+                      {cust.orderCount !== undefined ? (
+                        <span className="inline-flex items-center justify-center bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-1 rounded-full">
+                          {cust.orderCount}
+                        </span>
+                      ) : '-'}
+                    </td>
                     <td className="px-6 py-4">{new Date(cust.createdAt).toLocaleDateString()}</td>
                   </tr>
                 );

@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, ShoppingBag, FolderTree, ClipboardList, Gift, 
-  Image, HelpCircle, CreditCard, Users, LogOut, Loader2, Settings
+  Image, HelpCircle, CreditCard, Users, LogOut, Loader2, Settings, Layout
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -49,6 +49,7 @@ export default function AdminLayout({
   if (isSuperAdmin) {
     navLinks.push(
       { label: 'Staff Directory', href: '/admin/staff', icon: Users },
+      { label: 'Homepage Config', href: '/admin/homepage', icon: Layout },
       { label: 'Store Settings', href: '/admin/settings', icon: Settings }
     );
   }

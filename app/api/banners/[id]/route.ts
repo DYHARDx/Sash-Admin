@@ -17,12 +17,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, subtitle, imageUrl, linkUrl, status, position } = await request.json();
+    const { title, subtitle, imageUrl, linkUrl, bgText, bgColor, status, position } = await request.json();
 
     await connectDB();
     const banner = await Banner.findByIdAndUpdate(
       id,
-      { title, subtitle, imageUrl, linkUrl, status, position },
+      { title, subtitle, imageUrl, linkUrl, bgText, bgColor, status, position },
       { new: true }
     );
 

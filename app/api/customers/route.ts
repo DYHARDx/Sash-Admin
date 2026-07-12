@@ -17,7 +17,29 @@ export async function GET(request: NextRequest) {
     }
 
     await connectDB();
-    const customers = await User.find().sort({ createdAt: -1 });
+    const customers = await User.aggregate([
+      {
+        $lookup: {
+          from: 'orders',
+          localField: '_id',
+          foreignField: 'user',
+          as: 'orders'
+        }
+      },
+      {
+        $addFields: {
+          orderCount: { $size: '$orders' }
+        }
+      },
+      {
+        $project: {
+          orders: 0
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
     return NextResponse.json({ success: true, customers });
   } catch (error) {
     console.error('Fetch customers error:', error);

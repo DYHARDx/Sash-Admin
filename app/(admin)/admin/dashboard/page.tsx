@@ -48,15 +48,49 @@ export default async function AdminDashboardOverview() {
     .sort({ createdAt: -1 })
     .limit(5);
 
-  // 3. Compile charts data (Aggregated monthly, fallback to standard mock visual values if empty)
-  const defaultChartData = [
-    { month: 'Feb', sales: 42000, orders: 24 },
-    { month: 'Mar', sales: 65000, orders: 38 },
-    { month: 'Apr', sales: 59000, orders: 34 },
-    { month: 'May', sales: 88000, orders: 48 },
-    { month: 'Jun', sales: 110000, orders: 65 },
-    { month: 'Jul', sales: 145000, orders: 84 },
-  ];
+  // 3. Compile charts data (Aggregated monthly over the last 6 months)
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+  sixMonthsAgo.setDate(1);
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+
+  const monthlyStats = await Order.aggregate([
+    { 
+      $match: { 
+        createdAt: { $gte: sixMonthsAgo },
+        status: { $ne: 'Cancelled' }
+      } 
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" }
+        },
+        sales: { $sum: "$totalPrice" },
+        orders: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } }
+  ]);
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  // Fill in the last 6 months even if there is no data
+  const chartData = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const m = d.getMonth() + 1;
+    const y = d.getFullYear();
+    const stat = monthlyStats.find(s => s._id.month === m && s._id.year === y);
+    
+    chartData.push({
+      month: monthNames[m - 1],
+      sales: stat ? stat.sales : 0,
+      orders: stat ? stat.orders : 0
+    });
+  }
 
   return (
     <div className="space-y-8 flex-1 flex flex-col justify-between">
@@ -119,7 +153,7 @@ export default async function AdminDashboardOverview() {
       </div>
 
       {/* Analytics Charts */}
-      <AdminDashboardCharts data={defaultChartData} />
+      <AdminDashboardCharts data={chartData} />
 
       {/* Recent Orders log */}
       <div className="space-y-4 pt-4">
