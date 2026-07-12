@@ -11,6 +11,9 @@ const defaultSettings = {
   storeName: 'SASH',
   upiId: 'dyhardx@okaxis',
   upiMerchantName: 'Sash Clothing',
+  upiHelpText: 'After making the payment, open your UPI app\'s transaction history. Look for a 12-digit number labeled as "UPI Ref. ID", "UTR", or "Transaction ID". Enter it exactly as shown.',
+  upiHelpImageUrl: '',
+  upiHelpVideoUrl: '',
 };
 
 export async function GET(request: NextRequest) {
@@ -46,7 +49,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied: Super Admin only' }, { status: 403 });
     }
 
-    const { storeName, upiId, upiMerchantName } = await request.json();
+    const { storeName, upiId, upiMerchantName, upiHelpVideoUrl, upiHelpText, upiHelpImageUrl } = await request.json();
 
     if (!storeName || !upiId || !upiMerchantName) {
       return NextResponse.json({ error: 'All configuration fields are required' }, { status: 400 });
@@ -54,7 +57,7 @@ export async function PUT(request: NextRequest) {
 
     const updatedConfig = await Settings.findOneAndUpdate(
       { key: CONFIG_KEY },
-      { key: CONFIG_KEY, value: { storeName, upiId, upiMerchantName } },
+      { key: CONFIG_KEY, value: { storeName, upiId, upiMerchantName, upiHelpVideoUrl: upiHelpVideoUrl || '', upiHelpText: upiHelpText || '', upiHelpImageUrl: upiHelpImageUrl || '' } },
       { upsert: true, new: true }
     );
 

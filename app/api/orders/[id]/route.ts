@@ -8,11 +8,29 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     await connectDB();
-    const order = await Order.findOne({ orderId: id });
+    const order = await Order.findOne({ orderId: id })
+      .populate('paymentDetails')
+      .populate('items.product')
+      .lean();
+      
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
-    return NextResponse.json({ success: true, order });
+
+    const orderData = { ...order } as any;
+    if (orderData.paymentDetails) {
+      orderData.transactionId = orderData.paymentDetails.transactionId;
+      orderData.receiptUrl = orderData.paymentDetails.receiptUrl;
+    }
+    
+    if (orderData.items) {
+      orderData.items = orderData.items.map((item: any) => ({
+        ...item,
+        image: item.product?.images?.[0] || ''
+      }));
+    }
+
+    return NextResponse.json({ success: true, order: orderData });
   } catch (error) {
     console.error('Fetch order error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

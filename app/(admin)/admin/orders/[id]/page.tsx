@@ -12,6 +12,10 @@ interface OrderItem {
   quantity: number;
   size?: string;
   color?: string;
+  variant?: {
+    size?: string;
+    color?: string;
+  };
 }
 
 interface Order {
@@ -182,9 +186,12 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                     <img src={item.image} alt="" className="w-12 h-12 object-cover rounded border border-gray-200 bg-gray-50" />
                     <div>
                       <p className="font-bold text-gray-900">{item.name}</p>
-                      <p className="text-[10px] text-gray-500">
-                        {item.size && `Size: ${item.size}`} {item.color && `| Color: ${item.color}`}
-                      </p>
+                      {(item.variant?.size || item.size || item.variant?.color || item.color) && (
+                        <div className="flex gap-1.5 items-center mt-1.5">
+                          {(item.variant?.size || item.size) && <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 rounded">Size: {item.variant?.size || item.size}</span>}
+                          {(item.variant?.color || item.color) && <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 rounded">Color: {item.variant?.color || item.color}</span>}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
@@ -266,27 +273,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                   )}
                 </div>
 
-                {/* Screenshot preview */}
-                <div className="space-y-2">
-                  <span className="block text-[9px] font-bold text-gray-455 uppercase">Proof Screenshot</span>
-                  {order.receiptUrl ? (
-                    <div className="relative group border border-gray-200 rounded overflow-hidden max-h-48 bg-white flex justify-center">
-                      <img src={order.receiptUrl} alt="UPI receipt proof" className="object-contain max-h-44" />
-                      <a
-                        href={order.receiptUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="absolute bottom-2 right-2 bg-black/85 hover:bg-black text-white p-1.5 rounded flex items-center gap-1 text-[9px] uppercase font-bold tracking-wide"
-                      >
-                        Expand <ExternalLink size={10} />
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 bg-white border border-gray-250 rounded text-gray-450 italic">
-                      No screenshot uploaded.
-                    </div>
-                  )}
-                </div>
+
               </div>
             </div>
           )}

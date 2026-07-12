@@ -9,6 +9,9 @@ export default function SettingsPage() {
   const [storeName, setStoreName] = useState('');
   const [upiId, setUpiId] = useState('');
   const [upiMerchantName, setUpiMerchantName] = useState('');
+  const [upiHelpText, setUpiHelpText] = useState('');
+  const [upiHelpImageUrl, setUpiHelpImageUrl] = useState('');
+  const [upiHelpVideoUrl, setUpiHelpVideoUrl] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,6 +37,9 @@ export default function SettingsPage() {
         setStoreName(data.settings.storeName);
         setUpiId(data.settings.upiId);
         setUpiMerchantName(data.settings.upiMerchantName);
+        setUpiHelpText(data.settings.upiHelpText || '');
+        setUpiHelpImageUrl(data.settings.upiHelpImageUrl || '');
+        setUpiHelpVideoUrl(data.settings.upiHelpVideoUrl || '');
       } else {
         throw new Error(data.error || 'Failed to load store settings.');
       }
@@ -64,6 +70,9 @@ export default function SettingsPage() {
           storeName: storeName.trim(),
           upiId: upiId.trim(),
           upiMerchantName: upiMerchantName.trim(),
+          upiHelpText: upiHelpText.trim(),
+          upiHelpImageUrl: upiHelpImageUrl.trim(),
+          upiHelpVideoUrl: upiHelpVideoUrl.trim(),
         }),
       });
 
@@ -166,6 +175,48 @@ export default function SettingsPage() {
                   onChange={(e) => setUpiMerchantName(e.target.value)}
                 />
                 <p className="text-[10px] text-gray-400">The registered merchant entity displayed inside banking apps upon scan.</p>
+              </div>
+            </div>
+
+            <h2 className="text-xs font-bold text-gray-950 uppercase tracking-wider border-b border-gray-100 pb-2 pt-4">
+              Checkout Help & Instructions
+            </h2>
+
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Transaction ID Help Text (Optional)</label>
+                <textarea
+                  placeholder="Explain how to find the Transaction ID..."
+                  className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-xs focus:border-black focus:outline-none min-h-[80px]"
+                  value={upiHelpText}
+                  onChange={(e) => setUpiHelpText(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Help Image URL (Optional)</label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/screenshot.png"
+                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-xs focus:border-black focus:outline-none"
+                    value={upiHelpImageUrl}
+                    onChange={(e) => setUpiHelpImageUrl(e.target.value)}
+                  />
+                  <p className="text-[10px] text-gray-400">An image showing where to find the ID (proof/example).</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">Help Video URL (Optional)</label>
+                  <input
+                    type="url"
+                    placeholder="https://youtube.com/watch?v=..."
+                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-xs focus:border-black focus:outline-none"
+                    value={upiHelpVideoUrl}
+                    onChange={(e) => setUpiHelpVideoUrl(e.target.value)}
+                  />
+                  <p className="text-[10px] text-gray-400">A video link guiding users on how to find their UPI ID.</p>
+                </div>
               </div>
             </div>
 
