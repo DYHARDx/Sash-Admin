@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 // Simple dotenv parser to load Sash-Admin/.env manually without installing extra node packages
 const envPath = path.join(__dirname, '..', 'Sash-Admin', '.env');
@@ -34,7 +35,7 @@ const RoleSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const AdminSchema = new mongoose.Schema({
-  firebaseUid: { type: String, unique: true, index: true },
+  password: { type: String, select: false },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
@@ -91,15 +92,17 @@ async function seed() {
     const existingAdmin = await Admin.findOne({ email: superAdminEmail });
 
     if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash('password123', 10);
       await Admin.create({
         name: 'Super Admin',
         email: superAdminEmail,
+        password: hashedPassword,
         role: superAdminRole._id,
         permissions: [],
         status: 'active'
       });
       console.log(`Created bootstrap Super Admin user with email: ${superAdminEmail}`);
-      console.log("Note: On first login with this email in Sash-Admin, the Firebase UID will be linked.");
+      console.log("Note: Default password is 'password123'");
     } else {
       console.log(`Super Admin user with email ${superAdminEmail} already exists.`);
     }

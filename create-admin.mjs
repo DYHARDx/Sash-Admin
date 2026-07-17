@@ -1,35 +1,61 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA9cAOCHAmVFYBEjGL1IlJEXaweREV0GfY",
-  authDomain: "testing-1a3f6.firebaseapp.com",
-  projectId: "testing-1a3f6",
-  storageBucket: "testing-1a3f6.firebasestorage.app",
-  messagingSenderId: "377594262331",
-  appId: "1:377594262331:web:fc41692a34e9daca4d3d1e"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/sash";
 
 async function createAdmin() {
-  const email = "dyhard108@sash.in";
-  const password = "password123"; // default password
-
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log("Firebase user created successfully!");
-    console.log("User ID:", userCredential.user.uid);
-    console.log("Email:", userCredential.user.email);
-    console.log("Password: password123");
-    process.exit(0);
-  } catch (error) {
-    if (error.code === 'auth/email-already-in-use') {
-      console.log(`User ${email} already exists in Firebase Auth.`);
+    await mongoose.connect(MONGO_URI);
+    console.log("Connected to MongoDB.");
+
+    const db = mongoose.connection.db;
+
+    // First ensure the admin role exists
+    const rolesCollection = db.collection('roles');
+    let adminRole = await rolesCollection.findOne({ name: 'Admin' });
+    
+    if (!adminRole) {
+      const result = await rolesCollection.insertOne({
+        name: 'Admin',
+        permissions: ['*'],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      adminRole = { _id: result.insertedId };
+      console.log("Created Admin role.");
+    }
+
+    const email = "dyhard108@sash.in";
+    const password = "password123";
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const adminsCollection = db.collection('admins');
+    
+    const existingAdmin = await adminsCollection.findOne({ email });
+    if (existingAdmin) {
+      console.log(`Admin ${email} already exists.`);
       process.exit(0);
     }
-    console.error("Error creating user:", error.message);
+
+    const result = await adminsCollection.insertOne({
+      name: 'Super Admin',
+      email: email,
+      password: hashedPassword,
+      role: adminRole._id,
+      permissions: ['*'],
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    console.log("Admin user created successfully!");
+    console.log("User ID:", result.insertedId);
+    console.log("Email:", email);
+    console.log("Password: password123");
+    
+    process.exit(0);
+  } catch (error) {
+    console.error("Error creating user:", error);
     process.exit(1);
   }
 }

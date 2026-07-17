@@ -1,17 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  User as FirebaseUser,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 
 interface AuthContextType {
-  admin: FirebaseUser | null;
+  admin: any | null;
   mongoAdmin: any | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -21,68 +13,38 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [admin, setAdmin] = useState<FirebaseUser | null>(null);
+  const [admin, setAdmin] = useState<any | null>(null);
   const [mongoAdmin, setMongoAdmin] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const isLoggingIn = React.useRef(false);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
-    isLoggingIn.current = true;
     try {
-      let credential;
-      try {
-        credential = await signInWithEmailAndPassword(auth, email, password);
-      } catch (signInError: any) {
-        if (signInError.code === 'auth/invalid-credential' || signInError.code === 'auth/user-not-found') {
-          try {
-            credential = await createUserWithEmailAndPassword(auth, email, password);
-          } catch (createError: any) {
-            if (createError.code === 'auth/email-already-in-use') {
-              throw new Error('Invalid email or password.');
-            }
-            throw createError;
-          }
-        } else {
-          throw signInError;
-        }
-      }
-      const token = await credential.user.getIdToken();
-
-      // Create session cookie
-      await fetch('/api/auth/session', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: token }),
+        body: JSON.stringify({ email, password }),
       });
-
-      // Fetch MongoDB Admin profile to verify permission/status
-      const res = await fetch('/api/auth/me');
+      
       const data = await res.json();
 
       if (!res.ok) {
-        // If not found in database or suspended, sign out of Firebase
-        await signOut(auth);
-        await fetch('/api/auth/session', { method: 'DELETE' });
-        throw new Error(data.error || 'Access denied');
+        throw new Error(data.error || 'Login failed');
       }
 
-      setMongoAdmin(data.admin);
+      setAdmin(data.user);
+      setMongoAdmin(data.user);
     } catch (error) {
       console.error('Admin Login failed:', error);
-      await signOut(auth).catch(() => {});
       throw error;
     } finally {
       setLoading(false);
-      isLoggingIn.current = false;
     }
   };
 
   const logout = async () => {
     setLoading(true);
     try {
-      await signOut(auth);
-      // Remove session cookie
       await fetch('/api/auth/session', { method: 'DELETE' });
       setAdmin(null);
       setMongoAdmin(null);
@@ -94,40 +56,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setAdmin(firebaseUser);
-        
-        if (isLoggingIn.current) {
-           setLoading(false);
-           return;
-        }
-
-        try {
-          const res = await fetch('/api/auth/me');
-          if (res.ok) {
-            const data = await res.json();
-            setMongoAdmin(data.admin);
-          } else {
-            // Deny and sign out of Firebase if profile sync fails
-            await signOut(auth);
-            await fetch('/api/auth/session', { method: 'DELETE' });
-            setAdmin(null);
-            setMongoAdmin(null);
-          }
-        } catch (err) {
-          console.error('Sync error on admin auth state change:', err);
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          setAdmin(data.admin);
+          setMongoAdmin(data.admin);
+        } else {
           setAdmin(null);
           setMongoAdmin(null);
         }
-      } else {
+      } catch (err) {
+        console.error('Auth check error:', err);
         setAdmin(null);
         setMongoAdmin(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    };
+    checkAuth();
   }, []);
 
   return (

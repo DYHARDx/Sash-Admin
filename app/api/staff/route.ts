@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Admin from '@/lib/models/Admin';
-import { verifyFirebaseToken } from '@/lib/auth-jwt';
+import { verifySessionToken } from '@/lib/auth-jwt';
+import bcrypt from 'bcryptjs';
 import '@/lib/models/Role';
 
 export async function GET(request: NextRequest) {
   try {
-    const adminSessionToken = request.cookies.get('admin_session_token')?.value;
+    const sessionToken = request.cookies.get('session_token')?.value;
 
-    if (!adminSessionToken) {
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decodedToken = await verifyFirebaseToken(adminSessionToken);
+    const decodedToken = await verifySessionToken(sessionToken);
     if (!decodedToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -35,13 +36,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const adminSessionToken = request.cookies.get('admin_session_token')?.value;
+    const sessionToken = request.cookies.get('session_token')?.value;
 
-    if (!adminSessionToken) {
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decodedToken = await verifyFirebaseToken(adminSessionToken);
+    const decodedToken = await verifySessionToken(sessionToken);
     if (!decodedToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -64,37 +65,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'An admin with this email already exists' }, { status: 400 });
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Firebase API key is missing.' }, { status: 500 });
-    }
-
-    const firebaseRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: email.toLowerCase(),
-        password,
-        returnSecureToken: false,
-      }),
-    });
-
-    const firebaseData = await firebaseRes.json();
-
-    if (!firebaseRes.ok) {
-      console.error('Firebase Auth creation failed:', firebaseData);
-      return NextResponse.json(
-        { error: firebaseData.error?.message || 'Failed to create user in Firebase Auth.' },
-        { status: 400 }
-      );
-    }
-
-    const firebaseUid = firebaseData.localId;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = await Admin.create({
       name,
       email: email.toLowerCase(),
-      firebaseUid,
+      password: hashedPassword,
       role,
       status: 'active',
       permissions: [],

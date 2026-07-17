@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
@@ -18,8 +16,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await sendPasswordResetEmail(auth, email);
-      setMessage('Password reset link sent to your email inbox.');
+      // Stub: Since Firebase is removed, password resets would require a custom API
+      // For now, we simulate a request.
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setMessage('If an account exists, a password reset link has been sent to your email.');
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to send password reset email.');

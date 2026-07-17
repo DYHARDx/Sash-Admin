@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Category from '@/lib/models/Category';
-import { verifyFirebaseToken } from '@/lib/auth-jwt';
+import { verifySessionToken } from '@/lib/auth-jwt';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decodedToken = await verifyFirebaseToken(adminSessionToken);
+    const decodedToken = await verifySessionToken(adminSessionToken);
     if (!decodedToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

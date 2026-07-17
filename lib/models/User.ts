@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IUser extends Document {
-  firebaseUid: string;
+  googleId?: string;
   name: string;
   email: string;
   phoneNumber?: string;
@@ -13,7 +13,7 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema(
   {
-    firebaseUid: { type: String, required: true, unique: true, index: true },
+    googleId: { type: String, sparse: true, unique: true, index: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     phoneNumber: { type: String },

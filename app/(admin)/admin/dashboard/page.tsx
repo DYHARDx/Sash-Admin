@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { verifyFirebaseToken } from '@/lib/auth-jwt';
+import { verifySessionToken } from '@/lib/auth-jwt';
 import connectDB from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import Order from '@/lib/models/Order';
@@ -20,7 +20,7 @@ export default async function AdminDashboardOverview() {
     );
   }
 
-  const decodedToken = await verifyFirebaseToken(adminSessionToken);
+  const decodedToken = await verifySessionToken(adminSessionToken);
   if (!decodedToken) {
     return (
       <div className="text-center text-xs text-gray-500 py-12">
