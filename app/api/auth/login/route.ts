@@ -6,34 +6,43 @@ import { signSessionToken } from '@/lib/auth-jwt';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email, password: rawPassword } = await request.json();
 
-    if (!email || !password) {
+    if (!email || !rawPassword) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
+    const password = rawPassword.trim();
+
     await connectDB();
 
-    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    const admin = await Admin.findOne({ email: email.toLowerCase() })
+      .select('+password')
+      .populate('role');
     
     if (!admin) {
+      console.log('Login failed: Admin not found for email:', email);
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     if (admin.status !== 'active') {
+      console.log('Login failed: Account suspended for email:', email);
       return NextResponse.json({ error: 'Account is suspended' }, { status: 403 });
     }
 
     const isValidPassword = await bcrypt.compare(password, admin.password || '');
     if (!isValidPassword) {
+      console.log('Login failed: Invalid password for email:', email);
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
+    
+    console.log('Login successful for email:', email);
 
     // Generate JWT
     const token = await signSessionToken({
       userId: admin._id.toString(),
       email: admin.email,
-      role: admin.role.toString(),
+      role: admin.role?._id ? admin.role._id.toString() : admin.role.toString(),
     });
 
     const response = NextResponse.json({ 
@@ -48,7 +57,7 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set({
-      name: 'session_token',
+      name: 'admin_session_token',
       value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

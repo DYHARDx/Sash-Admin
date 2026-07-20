@@ -8,7 +8,7 @@ import '@/lib/models/Role';
 
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = request.cookies.get('session_token')?.value;
+    const sessionToken = request.cookies.get('admin_session_token')?.value;
 
     if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

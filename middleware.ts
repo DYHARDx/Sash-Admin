@@ -4,7 +4,7 @@ import { verifySessionToken } from './lib/auth-jwt';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionToken = request.cookies.get('session_token')?.value;
+  const sessionToken = request.cookies.get('admin_session_token')?.value;
 
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/forgot-password');
   const isAdminPath = pathname.startsWith('/admin') || (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth'));
@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     const payload = await verifySessionToken(sessionToken);
     if (!payload) {
       const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('session_token');
+      response.cookies.delete('admin_session_token');
       return response;
     }
   }
