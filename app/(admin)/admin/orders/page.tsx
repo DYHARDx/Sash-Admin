@@ -100,7 +100,7 @@ export default async function OrdersListPage({ searchParams }: PageProps) {
                 <tr key={ord._id.toString()} className="hover:bg-gray-50">
                   <td className="px-6 py-4 font-bold text-gray-900">{ord.orderId}</td>
                   <td className="px-6 py-4">{new Date(ord.createdAt).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 truncate max-w-[150px]">{ord.shippingAddress.fullName}</td>
+                  <td className="px-6 py-4 truncate max-w-[150px]">{ord.shippingAddress?.fullName || 'N/A'}</td>
                   <td className="px-6 py-4 font-bold">{ord.paymentMethod}</td>
                   <td className="px-6 py-4 font-bold text-gray-900">₹{ord.totalPrice}</td>
                   <td className="px-6 py-4">
