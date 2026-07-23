@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-
+import './Role'; // ensure Role schema is registered for populate
 export interface IAdmin extends Document {
   password?: string;
   name: string;

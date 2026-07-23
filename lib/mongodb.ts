@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
-
+import './models/Role';
+import './models/Admin';
+import './models/User';
+import './models/Product';
+import './models/Category';
+import './models/Order';
+import './models/Payment';
+import './models/Coupon';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
