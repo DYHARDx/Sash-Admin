@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const token = await signSessionToken({
       userId: admin._id.toString(),
       email: admin.email,
-      role: admin.role?._id ? admin.role._id.toString() : admin.role.toString(),
+      role: admin.role ? (admin.role._id ? admin.role._id.toString() : admin.role.toString()) : 'admin',
     });
 
     const response = NextResponse.json({ 
